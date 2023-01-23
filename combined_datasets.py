@@ -7,7 +7,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from support_functions import *
 
 def main():
-    inp_num, train_tensor, test_tensor, train_data, test_data = generate_test_train_data()
+    inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols = generate_test_train_data()
 
     # callbacks save only the best model and stop the model running early if results aren't improving
     callback_a = ModelCheckpoint(filepath='my_best_mode.hdf5', monitor='val_mse', mode='min', save_best_only=True,

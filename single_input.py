@@ -8,45 +8,12 @@ from support_functions import *
 
 
 def main():
-    # read in the full dataset
-    results = pd.read_csv('march_madness_85-21.csv')
-    # transform the teamnames from results to match those from the stats dataset
-    results['A_TEAM'] = results['A_TEAM'].apply(teamname_transform)
-    results['B_TEAM'] = results['B_TEAM'].apply(teamname_transform)
-
-    stats = pd.read_csv('cbb_stats_webscrape.csv')
-
-    # get the stats for both teams merged into the main df
-    merged_df = results.merge(stats.add_prefix('A_'), how='inner', left_on=['A_TEAM', 'YEAR'],
-                              right_on=['A_TEAM', 'A_YEAR'])
-    merged_df = merged_df.merge(stats.add_prefix('B_'), how='inner', left_on=['B_TEAM', 'YEAR'],
-                                right_on=['B_TEAM', 'B_YEAR'])
-
-    # print(len(results[(2007 < results['YEAR']) & (2022 > results['YEAR'])].sort_values(['YEAR', 'A_TEAM'])))
-    merged_df.to_csv('merged_df.csv', index=False)
-    # REMOVE 2019 RESULTS ONLY FOR TESTING WITH 2019
-    # merged_df = merged_df[merged_df['YEAR'] != 2019]
-
-    # Normalizing columns
-    numeric_cols = merged_df.select_dtypes("number").columns
-    # dropping the scores and the wins because this isn't info I will have when making a bracket
-    # dropping A_YEAR and B_YEAR because they do not add any information
-    numeric_cols = numeric_cols.drop(['A_WIN', 'A_SCORE', 'B_SCORE', 'A_YEAR', 'B_YEAR'])
-    merged_df[numeric_cols].mean(numeric_only=True).to_csv('stats_mean.csv', index=True)
-    merged_df[numeric_cols].std(numeric_only=True).to_csv('stats_std_dev.csv', index=True)
-
-    merged_df[numeric_cols] = (merged_df[numeric_cols] - merged_df[numeric_cols].mean(numeric_only=True)) / merged_df[numeric_cols].std(numeric_only=True)
-    # shuffle
-    shuffled = merged_df.sample(frac=1, random_state=1)
-
-    # split into training and test data
-    test_data = shuffled.iloc[:int(len(shuffled) * 0.2)]
-    train_data = shuffled.iloc[int(len(shuffled) * 0.2):]
-
+    inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols = generate_test_train_data()
     # converting to a tensor form that can be input into the model
-    train_tensor = tf.convert_to_tensor(shuffled[numeric_cols].iloc[int(len(shuffled) * 0.2):])
-    test_tensor = tf.convert_to_tensor(shuffled[numeric_cols].iloc[:int(len(shuffled) * 0.2)])
-    inp_num = len(train_tensor[0])
+    print(train_data['A_SEED'])
+    train_tensor = tf.convert_to_tensor(train_data['A_SEED'])
+    test_tensor = tf.convert_to_tensor(test_data['A_SEED'])
+    # inp_num = len(train_tensor[0])
 
     # callbacks save only the best model and stop the model running early if results aren't improving
     callback_a = ModelCheckpoint(filepath='my_best_mode.hdf5', monitor='val_mse', mode='min', save_best_only=True,
@@ -58,11 +25,7 @@ def main():
 
     # model setup
     model = models.Sequential()
-    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(100, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(100, input_dim=100, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(1, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
+    model.add(layers.Dense(1, input_dim=1, activation='tanh', kernel_initializer=x_initializer))
     model.summary()
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.005)

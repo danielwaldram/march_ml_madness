@@ -51,25 +51,23 @@ def generate_test_train_data():
     merged_df = merged_df[merged_df['YEAR'] != 2019]
     print(len(merged_df))
     # Normalizing columns
-    s = merged_df.select_dtypes("number").columns
-    s = s.drop(['A_WIN', 'A_SCORE', 'B_SCORE', 'A_YEAR', 'B_YEAR'])
-    merged_df[s].mean(numeric_only=True).to_csv('stats_mean.csv', index=True)
-    merged_df[s].std(numeric_only=True).to_csv('stats_std_dev.csv', index=True)
-
-    merged_df[s] = (merged_df[s] - merged_df[s].mean(numeric_only=True)) / merged_df[s].std(numeric_only=True)
-    # shuffle
-    shuffled = merged_df.sample(frac=1, random_state=1)
-    numeric_cols = shuffled.select_dtypes("number").columns
+    numeric_cols = merged_df.select_dtypes("number").columns
     # dropping the scores and the wins because this isn't info I will have when making a bracket
     # dropping A_YEAR and B_YEAR because they do not add any information.
-    # numeric_cols = numeric_cols.drop(['A_WIN', 'A_SCORE', 'B_SCORE', 'A_YEAR', 'B_YEAR'])
+    numeric_cols = numeric_cols.drop(['A_WIN', 'A_SCORE', 'B_SCORE', 'A_YEAR', 'B_YEAR'])
+    merged_df[numeric_cols].mean(numeric_only=True).to_csv('stats_mean.csv', index=True)
+    merged_df[numeric_cols].std(numeric_only=True).to_csv('stats_std_dev.csv', index=True)
+
+    merged_df[numeric_cols] = (merged_df[numeric_cols] - merged_df[numeric_cols].mean(numeric_only=True)) / merged_df[numeric_cols].std(numeric_only=True)
+    # shuffle
+    shuffled = merged_df.sample(frac=1, random_state=1)
 
     # split into training and test data
     test_data = shuffled.iloc[:int(len(shuffled) * 0.2)]
     train_data = shuffled.iloc[int(len(shuffled) * 0.2):]
 
     # converting to a tensor form that can be input into the model
-    train_tensor = tf.convert_to_tensor(shuffled[s].iloc[int(len(shuffled) * 0.2):])
-    test_tensor = tf.convert_to_tensor(shuffled[s].iloc[:int(len(shuffled) * 0.2)])
+    train_tensor = tf.convert_to_tensor(train_data[numeric_cols]) # (shuffled[numeric_cols].iloc[int(len(shuffled) * 0.2):])
+    test_tensor = tf.convert_to_tensor(test_data[numeric_cols]) # (shuffled[numeric_cols].iloc[:int(len(shuffled) * 0.2)])
     inp_num = len(train_tensor[0])
-    return inp_num, train_tensor, test_tensor, train_data, test_data
+    return inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols

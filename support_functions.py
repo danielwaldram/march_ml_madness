@@ -44,7 +44,6 @@ def generate_test_train_data():
     merged_df = merged_df.merge(stats.add_prefix('B_'), how='inner', left_on=['B_TEAM', 'YEAR'],
                                 right_on=['B_TEAM', 'B_YEAR'])
 
-    # print(len(results[(2007 < results['YEAR']) & (2022 > results['YEAR'])].sort_values(['YEAR', 'A_TEAM'])))
     merged_df.to_csv('merged_df.csv', index=False)
     # REMOVE 2019 RESULTS ONLY FOR TESTING WITH 2019
     print(len(merged_df))
@@ -71,3 +70,11 @@ def generate_test_train_data():
     test_tensor = tf.convert_to_tensor(test_data[numeric_cols]) # (shuffled[numeric_cols].iloc[:int(len(shuffled) * 0.2)])
     inp_num = len(train_tensor[0])
     return inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols
+
+def utility_calc_espn(matchup):
+    #print(matchup)
+    rounds = [1, 2, 3, 4, 5, 6]
+    #print(rounds.index(int(matchup['ROUND'])))
+    points = [10, 20, 40, 80, 160, 320]
+    return points[rounds.index(int(matchup['ROUND']))]
+

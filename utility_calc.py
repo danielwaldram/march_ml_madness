@@ -1,13 +1,38 @@
+"""
+This script makes tournament predictions based on the neural network trained and saved as my_best_mode.hdf5. The script
+takes in the full name of a csv with the input teams. Example format for input teams: "2022_tourney_teams.csv".
+Winning teams are selected by estimating their total points up to the curent round (utility) starting with the final
+round. The formula for utility is (probability*points + utility for last round). The probability of a team winning a
+matchup is estimated by the neural network. The points a team scores in a given round are based on the rules for the
+bracket challenge being used. The scoring system is passed as input to script.
+
+INPUTS - listed in the order they should be passed as arguments
+scoring system (The scoring system options and their descriptions are shown below)
+    espn - basic scoring system in which potential points double each round
+    waldram - potential points increase each round. Upsets are also rewarded based on the difference between the teams seeds.
+input teams csv file - include the full name of the file. Example: '2022_tourney_teams.csv'
+The output selections is saved as tourney_output_22.csv.
+"""
 # import itertools package
 import itertools
+import sys
 import pandas as pd
 from itertools import permutations
 from support_functions import *
 from tensorflow.keras import layers, models
 
-# ------ READ IN THE TOURNAMENT TEAMS AND  ------ #
+if len(sys.argv) < 3:
+    print("ERROR: TOO FEW ARGUMENTS PASSED. INCLUDE SCORING SYSTEM (espn or waldram) AND INPUT FILE NAME.")
+    exit()
+elif len(sys.argv) > 3:
+    print("ERROR: TOO MANY ARGUMENTS PASSED. ONLY PASS SCORING SYSTEM (espn or waldram) AND INPUT FILE NAME.")
+    exit()
+scoring_sys = sys.argv[1]
+
+
+# ------ READ IN THE TOURNAMENT TEAMS AND CREATE FULL DATASET WITH STATS  ------ #
 # read in the full dataset
-tourney_in = pd.read_csv('2022_tourney_teams.csv')
+tourney_in = pd.read_csv(sys.argv[2])
 # transform the teamnames from results to match those from the stats dataset
 tourney_in['TEAM'] = tourney_in['TEAM'].apply(teamname_transform)
 # initialize lists of all teams
@@ -109,7 +134,7 @@ q_val_list = []
 for team in probability_table['TEAM']:
     # grab the team and all its matchups in a given round
     prob_list.append(combinations_pd[(combinations_pd['A_TEAM'] == team) & (combinations_pd['ROUND'] == 1)]['predictions'].mean())
-    q_val_list.append(combinations_pd[(combinations_pd['A_TEAM'] == team) & (combinations_pd['ROUND'] == 1)]['predictions'].mean()*utility_calc_espn(combinations_pd[(combinations_pd['A_TEAM'] == team) & (combinations_pd['ROUND'] == 1)]))
+    q_val_list.append(combinations_pd[(combinations_pd['A_TEAM'] == team) & (combinations_pd['ROUND'] == 1)]['predictions'].mean()*utility_calc(combinations_pd[(combinations_pd['A_TEAM'] == team) & (combinations_pd['ROUND'] == 1)], scoring_sys))
 probability_table['ROUND_1'] = prob_list
 utility_table['ROUND_1'] = q_val_list
 # iterate through round 2 to 6
@@ -128,7 +153,7 @@ for rnd in range(2, 7):
             prob_of_win = float(combinations_pd[(combinations_pd['A_TEAM'] == team) & (combinations_pd['B_TEAM'] == sub_select.iloc[row]['B_TEAM'])]['predictions'])
             # multiply probabilities together and add to the total probability
             prob += prob_of_matchup*prob_of_win
-            q_val += utility_calc_espn(sub_select.iloc[row])*prob_of_matchup*prob_of_win
+            q_val += utility_calc(sub_select.iloc[row], scoring_sys)*prob_of_matchup*prob_of_win
         # finally, the probability that a team will make it to the round is the sum times the probability that the team made it through the last round
         prob_list.append(prob*float(probability_table[probability_table['TEAM'] == sub_select.iloc[row]['A_TEAM']]['ROUND_' + str(rnd - 1)]))
         # q_val still needs the previous rounds added on

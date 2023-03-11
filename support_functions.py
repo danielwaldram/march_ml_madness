@@ -71,10 +71,13 @@ def generate_test_train_data():
     inp_num = len(train_tensor[0])
     return inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols
 
-def utility_calc_espn(matchup):
-    #print(matchup)
-    rounds = [1, 2, 3, 4, 5, 6]
-    #print(rounds.index(int(matchup['ROUND'])))
-    points = [10, 20, 40, 80, 160, 320]
-    return points[rounds.index(int(matchup['ROUND']))]
-
+def utility_calc(matchup, scoring_sys):
+    if scoring_sys == 'espn':
+        # score for matchup = 2^(round -1 )*10
+        return pow(2, int(matchup['ROUND']) - 1)*10
+    elif scoring_sys == 'waldram':
+        # score for matchup = 2^(round - 1) + max(0, diff in seed)
+        return pow(2, int(matchup['ROUND']) - 1) + max([0, int(matchup['A_SEED']) - int(matchup['B_SEED'])])
+    else:
+        print("ERROR: SCORING SYSTEM NOT RECOGNIZED. SHOULD BE waldram OR espn!")
+        exit()

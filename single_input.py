@@ -1,3 +1,7 @@
+"""
+This script is to train a neural network with only a single input. The model trained is saved as my_best_mode_single_input.hdf5.
+For evaluating the model, the script outputs training and testing error with and without rounding.
+"""
 import pandas as pd
 import numpy as np
 import csv
@@ -16,7 +20,7 @@ def main():
     # inp_num = len(train_tensor[0])
 
     # callbacks save only the best model and stop the model running early if results aren't improving
-    callback_a = ModelCheckpoint(filepath='my_best_mode.hdf5', monitor='val_mse', mode='min', save_best_only=True,
+    callback_a = ModelCheckpoint(filepath='my_best_mode_single_input.hdf5', monitor='val_mse', mode='min', save_best_only=True,
                                  save_weights_only=True)
     callback_b = EarlyStopping(monitor='val_mse', mode='min', patience=30, verbose=1)
 
@@ -34,7 +38,7 @@ def main():
 
     history = model.fit(train_tensor, tf.convert_to_tensor(train_data['A_WIN']), validation_data=(test_tensor,
         tf.convert_to_tensor(test_data['A_WIN'])), epochs=200, callbacks=[callback_a, callback_b])  # , class_weight=weighting)
-    model.load_weights('my_best_mode.hdf5')
+    model.load_weights('my_best_mode_single_input.hdf5')
 
     # Testing error
     predictions = model.predict(test_tensor)

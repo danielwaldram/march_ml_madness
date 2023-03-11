@@ -1,3 +1,7 @@
+"""
+This script is to train a neural network with multiple numeric inputs. The model trained is saved as my_best_mode.hdf5.
+For evaluating the model, the script outputs training and testing error with and without rounding.
+"""
 import pandas as pd
 import numpy as np
 import csv
@@ -9,8 +13,6 @@ from support_functions import *
 def main():
     inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols = generate_test_train_data()
     pd.DataFrame(data=numeric_cols, columns=['input_cols']).to_csv('input_cols_numeric.csv', index=False)
-    print(len(train_tensor[0]))
-    input()
 
     # callbacks save only the best model and stop the model running early if results aren't improving
     callback_a = ModelCheckpoint(filepath='my_best_mode.hdf5', monitor='val_mse', mode='min', save_best_only=True,
@@ -18,7 +20,7 @@ def main():
     callback_b = EarlyStopping(monitor='val_mse', mode='min', patience=30, verbose=1)
 
     # initialization method for the weights: xavier initialization for tanh
-    x_initializer = tf.keras.initializers.GlorotNormal()
+    x_initializer = tf.keras.initializers.GlorotNormal(seed=0)
 
     # model setup
     model = models.Sequential()

@@ -1,6 +1,11 @@
+"""
+This script grabs data from the barttorvik website for each year in the range specified in main(). Data spans from 2008
+to the year passed as an argument to the script. Generally, the current year should be passed as an argument.
+"""
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import sys
 
 def data_for_year(year, df_cols):
     URL = "https://barttorvik.com/trank.php?year=" + str(year) + "&sort=&top=0&conlimit=All&venue=All&type=All#"
@@ -56,10 +61,17 @@ def data_for_year(year, df_cols):
     return year_df
 
 def main():
+    if len(sys.argv) < 2:
+        print("TOO FEW ARGUMENTS PASSED. INCLUDE ENDING YEAR FOR DATA PULL IN 'YYYY' FORMAT.")
+    elif len(sys.argv) > 2:
+        print("TOO MANY ARGUMENTS PASSED. ONLY PASS ENDING YEAR FOR DATA PULL IN 'YYYY' FORMAT.")
+    ending_year = int(sys.argv[1])
+    # select the columns we want to keep to train our model on. SEED is used but is brought in from
     stats_cols = pd.read_csv('cbb.csv').columns
     stats_cols = stats_cols.drop(['POSTSEASON', 'SEED', 'W'])
     stats_df = pd.DataFrame(columns=stats_cols)
-    for yr in range(2008, 2023):
+    # loop through each year and add the data to the webscrape file
+    for yr in range(2008, ending_year + 1):
         print(yr)
         stats_df = pd.concat([stats_df, data_for_year(yr, stats_cols)])
     stats_df.to_csv('cbb_stats_webscrape.csv', index=False)

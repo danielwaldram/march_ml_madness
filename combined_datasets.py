@@ -58,6 +58,5 @@ def main():
     test_data.to_csv('output_combined_data.csv', index=False)
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()

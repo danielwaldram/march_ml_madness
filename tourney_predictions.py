@@ -1,4 +1,11 @@
+"""
+This script makes tournament predictions based on the neural network trained and saved as my_best_mode.hdf5. The script
+takes in the full name of a csv with the input teams. Example format for input teams: "2022_tourney_input.csv".
+Winning teams are selected based on the neural networks prediction for a given matchup starting with the first round.
+The output selections is saved as tourney_output_22.csv.
+"""
 import pandas as pd
+import sys
 import numpy as np
 import csv
 import tensorflow as tf
@@ -7,8 +14,12 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from support_functions import *
 
 def main():
+    if len(sys.argv) < 2:
+        print("TOO FEW ARGUMENTS PASSED. INCLUDE THE FULL NAME OF THE CSV FILE WITH INPUT TEAMS.")
+    elif len(sys.argv) > 2:
+        print("TOO MANY ARGUMENTS PASSED. ONLY PASS THE FULL NAME OF THE CSV FILE WITH INPUT TEAMS.")
     # read in the full dataset
-    tourney_in = pd.read_csv('2022_tourney_input.csv')
+    tourney_in = pd.read_csv(sys.argv[1])
     year = tourney_in['YEAR'][0]
     tourney_out = pd.DataFrame(columns=tourney_in.columns)
     tourney_out['prediction'] = []

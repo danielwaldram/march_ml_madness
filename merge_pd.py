@@ -16,7 +16,7 @@ def main():
     max_year = max([results['YEAR'].min(), stats['YEAR'].min()])
 
     # grab the same years from each: stats: 2013-2019, results: 1985-2021
-    stats = stats[min_year <= stats['YEAR']][max_year >= stats['YEAR']].sort_values(['YEAR', 'TEAM'])
+    stats = stats[(min_year <= stats['YEAR']) & (max_year >= stats['YEAR'])].sort_values(['YEAR', 'TEAM'])
     results = results[(min_year <= results['YEAR']) & (max_year >= results['YEAR'])].sort_values(['YEAR', 'A_TEAM'])
     # replace all instances of State in results with St.
     results['A_TEAM'] = results['A_TEAM'].apply(teamname_transform)

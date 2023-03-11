@@ -46,9 +46,9 @@ def generate_test_train_data():
 
     merged_df.to_csv('merged_df.csv', index=False)
     # REMOVE 2019 RESULTS ONLY FOR TESTING WITH 2019
-    print(len(merged_df))
-    merged_df = merged_df[merged_df['YEAR'] != 2019]
-    print(len(merged_df))
+    # print(len(merged_df))
+    # merged_df = merged_df[merged_df['YEAR'] != 2019]
+    # print(len(merged_df))
     # Normalizing columns
     numeric_cols = merged_df.select_dtypes("number").columns
     # dropping the scores and the wins because this isn't info I will have when making a bracket
@@ -66,8 +66,8 @@ def generate_test_train_data():
     train_data = shuffled.iloc[int(len(shuffled) * 0.2):]
 
     # converting to a tensor form that can be input into the model
-    train_tensor = tf.convert_to_tensor(train_data[numeric_cols]) # (shuffled[numeric_cols].iloc[int(len(shuffled) * 0.2):])
-    test_tensor = tf.convert_to_tensor(test_data[numeric_cols]) # (shuffled[numeric_cols].iloc[:int(len(shuffled) * 0.2)])
+    train_tensor = tf.convert_to_tensor(train_data[numeric_cols])  # (shuffled[numeric_cols].iloc[int(len(shuffled) * 0.2):])
+    test_tensor = tf.convert_to_tensor(test_data[numeric_cols])  # (shuffled[numeric_cols].iloc[:int(len(shuffled) * 0.2)])
     inp_num = len(train_tensor[0])
     return inp_num, train_tensor, test_tensor, train_data, test_data, numeric_cols
 

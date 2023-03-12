@@ -76,8 +76,10 @@ def utility_calc(matchup, scoring_sys):
         # score for matchup = 2^(round -1 )*10
         return pow(2, int(matchup['ROUND']) - 1)*10
     elif scoring_sys == 'waldram':
-        # score for matchup = 2^(round - 1) + max(0, diff in seed)
-        return pow(2, int(matchup['ROUND']) - 1) + max([0, int(matchup['A_SEED']) - int(matchup['B_SEED'])])
+        # score for matchup = points + max(0, diff in seed)
+        rounds = [1, 2, 3, 4, 5, 6]
+        points = [4, 8, 16, 20, 25, 30]
+        return points[rounds.index(int(matchup['ROUND']))] + max([0, int(matchup['A_SEED']) - int(matchup['B_SEED'])])
     else:
         print("ERROR: SCORING SYSTEM NOT RECOGNIZED. SHOULD BE waldram OR espn!")
         exit()

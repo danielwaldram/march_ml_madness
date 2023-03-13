@@ -55,13 +55,7 @@ def main():
     inp_num = len(s)
 
     # model setup
-    model = models.Sequential()
-    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh'))
-    model.add(layers.Dense(100, input_dim=inp_num, activation='tanh'))
-    model.add(layers.Dense(100, input_dim=100, activation='tanh'))
-    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh'))
-    model.add(layers.Dense(1, input_dim=inp_num, activation='tanh'))
-    model.summary()
+    model = create_model(inp_num)
     model.load_weights('my_best_mode.hdf5')
 
     # While loop goes through every round 1-6

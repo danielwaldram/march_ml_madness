@@ -19,17 +19,8 @@ def main():
                                  save_weights_only=True)
     callback_b = EarlyStopping(monitor='val_mse', mode='min', patience=30, verbose=1)
 
-    # initialization method for the weights: xavier initialization for tanh
-    x_initializer = tf.keras.initializers.GlorotNormal(seed=0)
-
     # model setup
-    model = models.Sequential()
-    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(100, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(100, input_dim=100, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.add(layers.Dense(1, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
-    model.summary()
+    model = create_model(inp_num)
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.005)
     model.compile(loss='mse', metrics='mse',

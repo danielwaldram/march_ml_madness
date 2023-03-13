@@ -83,3 +83,16 @@ def utility_calc(matchup, scoring_sys):
     else:
         print("ERROR: SCORING SYSTEM NOT RECOGNIZED. SHOULD BE waldram OR espn!")
         exit()
+
+def create_model(inp_num):
+    # initialization method for the weights: xavier initialization for tanh
+    x_initializer = tf.keras.initializers.GlorotNormal(seed=0)
+
+    model = models.Sequential()
+    model.add(layers.Dense(inp_num, input_dim=inp_num, activation='tanh', kernel_initializer=x_initializer))
+    model.add(layers.Dropout(0.5))
+    model.add(layers.Dense(40, input_dim=40, activation='tanh', kernel_initializer=x_initializer))
+    model.add(layers.Dropout(0.5))
+    model.add(layers.Dense(1, input_dim=30, activation='tanh', kernel_initializer=x_initializer))
+    model.summary()
+    return model
